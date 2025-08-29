@@ -243,6 +243,17 @@ void VisualSlamNode::ReadImageData(
   if (!(impl_->IsInitialized())) {
     impl_->Init(msg_left_ci, msg_right_ci);
     impl_->last_img_ts = current_ts;
+
+    tf2::Transform odom_vslam = impl_->GetFrameTransform(
+      timestamp, map_frame_, odom_reference_frame_);
+
+    auto req = std::make_shared<SrvSetOdometryPose::Request>();
+    tf2::toMsg(odom_vslam, req->pose);
+
+    CallbackSetOdometryPose(
+      req,
+      std::make_shared<SrvSetOdometryPose::Response>());
+
   }
 
   impl_->stream_sequencer.CallbackStream2(current_ts, {msg_left_img, msg_right_img});
