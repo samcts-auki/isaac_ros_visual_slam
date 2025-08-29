@@ -126,6 +126,11 @@ private:
   // The IMU to left camera transformation
   const std::string input_imu_frame_;
 
+  // Defines the name of the IMU camera frame used to calculate left_camera_pose_imu
+  // The IMU to left camera transformation
+  const std::string odom_reference_frame_;
+
+
   // Publish output frames hierarchy. Default is true.
   bool publish_odom_to_base_tf_;
   bool publish_map_to_odom_tf_;

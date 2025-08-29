@@ -75,6 +75,9 @@ VisualSlamNode::VisualSlamNode(rclcpp::NodeOptions options)
   odom_frame_(declare_parameter<std::string>("odom_frame", "odom")),
   base_frame_(declare_parameter<std::string>("base_frame", "base_link")),
 
+  // set origin odom 
+  odom_reference_frame_(declare_parameter<std::string>("odom_reference_frame", "d435_link")),
+
   override_publishing_stamp_(declare_parameter<bool>("override_publishing_stamp", false)),
 
   path_max_size_(declare_parameter<int>("path_max_size", 1024)),
