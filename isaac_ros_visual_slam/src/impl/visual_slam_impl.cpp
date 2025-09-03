@@ -36,6 +36,23 @@ constexpr char kBrown5k[] = "brown5k";
 constexpr char kPinhole[] = "pinhole";
 constexpr char kPolynomial[] = "polynomial";
 
+
+inline void log_tf2_transform(
+    const rclcpp::Logger &logger,
+    const std::string &prefix,
+    const tf2::Transform &tf)
+{
+    const tf2::Vector3 &t = tf.getOrigin();
+    const tf2::Quaternion &q = tf.getRotation();
+
+    RCLCPP_DEBUG(
+        logger,
+        "%s Translation: [x=%.4f, y=%.4f, z=%.4f], Rotation: [x=%.4f, y=%.4f, z=%.4f, w=%.4f]",
+        prefix.c_str(),
+        t.x(), t.y(), t.z(),
+        q.x(), q.y(), q.z(), q.w());
+}
+
 // ROS' DISTORTION MODELS:
 // 1.PLUMB_BOB
 // 2.RATIONAL_POLYNOMIAL
@@ -832,9 +849,16 @@ void VisualSlamNode::VisualSlamImpl::TrackAndGetPose(
     tf2::Transform ros_slam_pose{ChangeBasis(canonical_pose_cuvslam, cuvslam_slam_pose)};
 
     const tf2::Transform odom_pose_base_link = initial_odom_pose_left * ros_vo_pose *
-      base_link_pose_left.inverse();
+      initial_odom_pose_left.inverse();
+
+    log_tf2_transform(node.get_logger(), "ros_vo_pose:", ros_vo_pose);
+    log_tf2_transform(node.get_logger(), "initial_odom_pose_left:", initial_odom_pose_left);
+    log_tf2_transform(node.get_logger(), "odom_pose_base_link:", odom_pose_base_link);
+
     const tf2::Transform map_pose_base_link = initial_map_pose_left * ros_slam_pose *
-      base_link_pose_left.inverse();
+      initial_odom_pose_left.inverse();
+
+    // const tf2::Transform odom_pose_base_link = ros_vo_pose * initial_odom_pose_left.inverse();
 
     // Frames hierarchy:
     // map - odom - base_link - ... - camera

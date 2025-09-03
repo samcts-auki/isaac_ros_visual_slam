@@ -22,11 +22,11 @@ from launch_ros.descriptions import ComposableNode
 
 def generate_launch_description():
     """Launch file which brings up visual slam node configured for RealSense."""
-    camera_torso_vslam_static_transform_publisher = Node(
-        package='tf2_ros',
-        executable='static_transform_publisher',
-        arguments=['0.000',' 0.000', '0.000'
-                   '1.000', '0.000', '-0.787', '0.000', 'd435_link', 'd435_link_vslam']
+    map_to_odom_node = Node(
+        package="tf2_ros",
+        executable="static_transform_publisher",
+        output="screen" ,
+        arguments=["0", "0", "0", "0", "0", "0", "map", "odom"]
     )
 
     visual_slam_node = ComposableNode(
@@ -38,13 +38,14 @@ def generate_launch_description():
                     'rectified_images': True,
                     'enable_debug_mode': False,
                     'debug_dump_path': '/tmp/cuvslam',
-                    'enable_slam_visualization': False,
-                    'enable_landmarks_view': False,
-                    'enable_observations_view': False,
+                    'enable_slam_visualization': True,
+                    'enable_landmarks_view': True,
+                    'enable_observations_view': True,
                     'map_frame': 'map',
-                    'odom_frame': 'odom_vslam',
-                    'base_frame': 'd435_link_vslam',
-                    'odom_reference_frame': 'd435_link',
+                    'odom_frame': 'odom',
+                    'base_frame': 'pelvis',
+                    'input_base_frame': 'pelvis',
+                    'input_left_camera_frame': 'd435_link',
                     'input_imu_frame': 'd435_gyro_optical_frame',
                     'enable_imu_fusion': True,
                     'gyro_noise_density': 0.000244,
@@ -73,10 +74,11 @@ def generate_launch_description():
         composable_node_descriptions=[
             visual_slam_node
         ],
-        output='screen'
+        output='screen',
+        # arguments=['--ros-args', '--log-level', 'debug']
     )
 
     return launch.LaunchDescription([
-        camera_torso_vslam_static_transform_publisher,
+        map_to_odom_node,
         visual_slam_launch_container, 
         ])

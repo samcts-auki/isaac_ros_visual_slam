@@ -76,7 +76,7 @@ VisualSlamNode::VisualSlamNode(rclcpp::NodeOptions options)
   base_frame_(declare_parameter<std::string>("base_frame", "base_link")),
 
   // set origin odom 
-  odom_reference_frame_(declare_parameter<std::string>("odom_reference_frame", "d435_link")),
+  odom_reference_frame_(declare_parameter<std::string>("odom_reference_frame", "")),
 
   override_publishing_stamp_(declare_parameter<bool>("override_publishing_stamp", false)),
 
@@ -241,19 +241,22 @@ void VisualSlamNode::ReadImageData(
 
   // Initialize on first call
   if (!(impl_->IsInitialized())) {
+    RCLCPP_INFO(this->get_logger(), "Initializing VisualSlamNode");
     impl_->Init(msg_left_ci, msg_right_ci);
     impl_->last_img_ts = current_ts;
 
-    tf2::Transform odom_vslam = impl_->GetFrameTransform(
-      timestamp, map_frame_, odom_reference_frame_);
+    if (!odom_reference_frame_.empty()) {
+      tf2::Transform odom_vslam = impl_->GetFrameTransform(
+        timestamp, map_frame_, odom_reference_frame_);
 
-    auto req = std::make_shared<SrvSetOdometryPose::Request>();
-    tf2::toMsg(odom_vslam, req->pose);
+      auto req = std::make_shared<SrvSetOdometryPose::Request>();
+      tf2::toMsg(odom_vslam, req->pose);
 
-    CallbackSetOdometryPose(
-      req,
-      std::make_shared<SrvSetOdometryPose::Response>());
-
+      CallbackSetOdometryPose(
+        req,
+        std::make_shared<SrvSetOdometryPose::Response>());
+    }
+    RCLCPP_INFO(this->get_logger(), "Initialized VisualSlamNode");
   }
 
   impl_->stream_sequencer.CallbackStream2(current_ts, {msg_left_img, msg_right_img});
