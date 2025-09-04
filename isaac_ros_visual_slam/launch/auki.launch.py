@@ -22,11 +22,12 @@ from launch_ros.descriptions import ComposableNode
 
 def generate_launch_description():
     """Launch file which brings up visual slam node configured for RealSense."""
-    map_to_odom_node = Node(
+
+    pelvis_to_pelvis_base = Node(
         package="tf2_ros",
         executable="static_transform_publisher",
         output="screen" ,
-        arguments=["0", "0", "0", "0", "0", "0", "map", "odom"]
+        arguments=["0", "0", "0.741", "0", "0", "0", "pelvis_base", "pelvis"]
     )
 
     visual_slam_node = ComposableNode(
@@ -38,13 +39,13 @@ def generate_launch_description():
                     'rectified_images': True,
                     'enable_debug_mode': False,
                     'debug_dump_path': '/tmp/cuvslam',
-                    'enable_slam_visualization': True,
-                    'enable_landmarks_view': True,
-                    'enable_observations_view': True,
+                    'enable_slam_visualization': False,
+                    'enable_landmarks_view': False,
+                    'enable_observations_view': False,
                     'map_frame': 'map',
                     'odom_frame': 'odom',
-                    'base_frame': 'pelvis',
-                    'input_base_frame': 'pelvis',
+                    'base_frame': 'pelvis_base',
+                    'input_base_frame': 'pelvis_base',
                     'input_left_camera_frame': 'd435_link',
                     'input_imu_frame': 'd435_gyro_optical_frame',
                     'enable_imu_fusion': True,
@@ -79,6 +80,6 @@ def generate_launch_description():
     )
 
     return launch.LaunchDescription([
-        map_to_odom_node,
+        pelvis_to_pelvis_base,
         visual_slam_launch_container, 
         ])
